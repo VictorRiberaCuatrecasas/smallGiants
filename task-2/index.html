@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 2</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="collection" aria-labelledby="collection-title">
+      <header class="collection__header">
+        <div>
+          <p class="collection__eyebrow">Task 2</p>
+          <h1 id="collection-title">Collection Filters</h1>
+          <p class="collection__intro">A small collection page toolbar with shareable filter state.</p>
+        </div>
+        <p id="count" class="collection__count" aria-live="polite"></p>
+      </header>
+
+      <form class="toolbar" aria-label="Product filters">
+        <label class="toolbar__field">
+          <span>Category</span>
+          <select id="category"></select>
+        </label>
+
+        <label class="toolbar__field toolbar__field--range">
+          <span>Max price</span>
+          <strong id="price-value" class="toolbar__value"></strong>
+          <input id="max-price" type="range">
+        </label>
+
+        <label class="toolbar__toggle">
+          <input id="stock" type="checkbox">
+          <span>In stock only</span>
+        </label>
+
+        <label class="toolbar__field">
+          <span>Sort</span>
+          <select id="sort">
+            <option value="default">Featured order</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+            <option value="title-asc">Alphabetical</option>
+          </select>
+        </label>
+      </form>
+
+      <section>
+        <h2 class="visually-hidden">Products</h2>
+        <div id="grid" class="grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="./main.js"></script>
+</body>
+</html>
