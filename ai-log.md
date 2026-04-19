@@ -1,20 +1,55 @@
-
 using
+
 - chatGPT for voice dictation and general questions
 - copilot for autocompletion
 - Codex for Planing / Agents
 
-
 done:
-prompt  engineering for planing tasks individually / 3 iterations of plan execution to compare at quick glance results and chose an iteration to work with
+task-1:
+prompt engineering for planing tasks individually / 3 iterations of plan execution to compare at quick glance results and chose an iteration to work with
+fix minimum requirments
+refactor and optimization
+
+task-2
 
 
+task-3
+
+
+task-4
 
 good:
--task-1 styling is quite accurate with reference used https://muppetmeals.com/
+-task 1 :
 
+- task-1 styling is quite accurate with reference used https://muppetmeals.com/
+- task-1 about 90% right with 3 iterations
+- task-1 good insights on refactor and improvements, specially regarding all1 aria
+
+task-2
+
+
+task-3
+
+
+task-4
 
 bad:
+
+task-1:
+
 - inconsistent results executing same plan for task 1, excesive js and css. One output had 1.6lines of code, didnt even bother looking at it. prompt for planing was specific about keeping it short and simple
 - loading skeleton of task 1 took some fine tuning to fix the dimentions. loading skeleton didnt match card dimensions
 - task-1 card broke/wrapped weirdly at 360px~
+- task-1 changing swatch re renders all the card making it lose focus track / also added aria live which will trigger on re render and its just noise
+- In general, input validation is not considered. This is intentionally ignored as it could be easily handled with ts or another validation approach.
+- removed strike-through styles in prices when it knew it was a requirment
+
+task-2
+
+
+task-3
+
+
+task-4
+
+TODO: prettify with ia
