@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task -1</title>
+  <style>
+    :root {
+      --cream: #f7f0e1;
+      --paper: #fffdf8;
+      --sand: #eadfc8;
+      --ink: #3e3428;
+      --muted: #7d725f;
+      --line: rgba(62, 52, 40, 0.12);
+      --accent: #1a1a2e;
+      --shadow: 0 20px 40px rgba(68, 52, 31, 0.1);
+      --skeleton-fill: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.85) 50%,
+        rgba(255, 255, 255, 0.45) 100%
+      );
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      color: var(--ink);
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    .card {
+      width: min(100%, 360px);
+      padding: 16px;
+      border-radius: 28px;
+      background: var(--cream);
+      border: 1px solid rgba(62, 52, 40, 0.08);
+      box-shadow: var(--shadow);
+    }
+
+    .card.is-loading {
+      pointer-events: none;
+    }
+
+    .media {
+      position: relative;
+      padding: 16px;
+      border-radius: 22px;
+      background: var(--paper);
+      border: 2px solid var(--accent);
+      overflow: hidden;
+    }
+
+    .badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: inline-flex;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(62, 52, 40, 0.1);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .media-visual {
+      width: min(100%, 260px);
+      margin: 18px auto 8px;
+      border-radius: 18px;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+    }
+
+    .media img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .quick-add {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      padding: 12px 16px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--ink);
+      color: #fffdf8;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .card:is(:hover, :focus-within) .quick-add {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .content {
+      padding: 18px 4px 2px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .vendor {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 5vw, 1.9rem);
+      line-height: 1.1;
+      font-family: "Iowan Old Style", "Georgia", serif;
+    }
+
+    .price-row,
+    .rating,
+    .swatches {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .price {
+      font-size: 1.55rem;
+      font-weight: 800;
+    }
+
+    .compare {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .stars {
+      position: relative;
+      display: inline-block;
+      color: rgba(62, 52, 40, 0.16);
+      letter-spacing: 0.14em;
+    }
+
+    .stars::after {
+      content: "\2605\2605\2605\2605\2605";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: calc(var(--rating) / 5 * 100%);
+      overflow: hidden;
+      color: #b7823f;
+    }
+
+    .rating {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .swatches-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .swatch-list {
+      display: flex;
+      gap: 10px;
+    }
+
+    .swatch {
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .swatch[aria-pressed="true"] {
+      border-color: var(--accent);
+    }
+
+    .swatch span {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(62, 52, 40, 0.18);
+    }
+
+    .copy-mask {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      vertical-align: top;
+    }
+
+    .card.is-loading .badge,
+    .card.is-loading .media-visual,
+    .card.is-loading .quick-add,
+    .card.is-loading .swatch span,
+    .card.is-loading .copy-mask::after,
+    .card.is-loading .stars::before {
+      background: var(--skeleton-fill);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s linear infinite;
+    }
+
+    .card.is-loading .badge {
+      color: transparent;
+      border-color: transparent;
+    }
+
+    .card.is-loading .media img {
+      opacity: 0;
+    }
+
+    .card.is-loading .quick-add {
+      opacity: 1;
+      transform: none;
+      color: transparent;
+      cursor: default;
+    }
+
+    .card.is-loading .copy-mask {
+      color: transparent;
+    }
+
+    .card.is-loading .copy-mask::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+    }
+
+    .card.is-loading h1 .copy-mask::after {
+      border-radius: 14px;
+    }
+
+    .card.is-loading .compare {
+      text-decoration-color: transparent;
+    }
+
+    .card.is-loading .stars {
+      color: transparent;
+    }
+
+    .card.is-loading .stars::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+    }
+
+    .card.is-loading .stars::after {
+      content: none;
+    }
+
+    .card.is-loading .swatch {
+      border-color: transparent;
+      cursor: default;
+    }
+
+    .card.is-loading .swatch span {
+      border-color: transparent;
+    }
+
+    :focus-visible {
+      outline: 3px solid rgba(123, 102, 73, 0.35);
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+      }
+
+      .card.is-loading .badge,
+      .card.is-loading .media-visual,
+      .card.is-loading .quick-add,
+      .card.is-loading .swatch span,
+      .card.is-loading .copy-mask::after,
+      .card.is-loading .stars::before {
+        animation: none;
+      }
+
+      .quick-add {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @keyframes shimmer {
+      from {
+        background-position: 200% 0;
+      }
+
+      to {
+        background-position: -200% 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app" aria-live="polite"></main>
+
+  <script>
+    const product = {
+      title: "Merino Wool Crew Neck",
+      vendor: "Nomad Goods",
+      price: 89.0,
+      compareAtPrice: 119.0,
+      badge: "Sale",
+      image: "https://picsum.photos/seed/card/400/500",
+      colors: ["#1a1a2e", "#e8d5b7", "#4a7c59"],
+      rating: 4.3,
+      reviewCount: 128
+    };
+
+    const state = {
+      activeColor: 0,
+      isLoading: true
+    };
+
+    const app = document.getElementById("app");
+
+    function money(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD"
+      }).format(value);
+    }
+
+    function discount(price, compareAtPrice) {
+      return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
+    }
+
+    function cardMarkup(isLoading) {
+      const accent = product.colors[state.activeColor];
+      const ratingText = `${product.rating.toFixed(1)} &middot; ${product.reviewCount} reviews`;
+      const inertAttrs = isLoading ? ' tabindex="-1"' : "";
+
+      return `
+        <article class="card${isLoading ? " is-loading" : ""}" style="--accent:${accent}"${isLoading ? ' aria-hidden="true"' : ""}>
+          <div class="media">
+            <div class="badge">
+              <span>${product.badge}</span>
+              <span>${discount(product.price, product.compareAtPrice)}% off</span>
+            </div>
+
+            <div class="media-visual">
+              <img src="${product.image}" alt="${product.title} by ${product.vendor}" width="400" height="500">
+            </div>
+
+            <button class="quick-add" type="button"${inertAttrs}>Add to cart</button>
+          </div>
+
+          <div class="content">
+            <p class="vendor">
+              <span class="copy-mask">${product.vendor}</span>
+            </p>
+
+            <h1>
+              <span class="copy-mask">${product.title}</span>
+            </h1>
+
+            <div class="price-row" aria-label="Pricing">
+              <span class="price">
+                <span class="copy-mask">${money(product.price)}</span>
+              </span>
+              <span class="compare">
+                <span class="copy-mask">${money(product.compareAtPrice)}</span>
+              </span>
+            </div>
+
+            <div class="rating" aria-label="Rated ${product.rating} out of 5 from ${product.reviewCount} reviews">
+              <span class="stars" aria-hidden="true" style="--rating:${product.rating}">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              <span class="rating-copy">
+                <span class="copy-mask">${ratingText}</span>
+              </span>
+            </div>
+
+            <div class="swatches">
+              <span class="swatches-label">
+                <span class="copy-mask">Colours</span>
+              </span>
+
+              <div class="swatch-list" role="group" aria-label="Choose a colour">
+                ${product.colors.map((color, index) => `
+                  <button class="swatch" type="button" data-index="${index}" aria-pressed="${state.activeColor === index}" aria-label="Select colour ${index + 1}"${inertAttrs}>
+                    <span style="background:${color}"></span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function render() {
+      app.setAttribute("aria-busy", String(state.isLoading));
+      app.innerHTML = cardMarkup(state.isLoading);
+
+      if (state.isLoading) {
+        return;
+      }
+
+      app.querySelectorAll(".swatch").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.activeColor = Number(button.dataset.index);
+          render();
+        });
+      });
+    }
+
+    render();
+
+    window.setTimeout(() => {
+      state.isLoading = false;
+      render();
+    }, 1500);
+  </script>
+</body>
+</html>
