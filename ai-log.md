@@ -5,18 +5,14 @@ using
 - Codex for Planing / Agents
 
 done:
-task-1:
-prompt engineering for planing tasks individually / 3 iterations of plan execution to compare at quick glance results and chose an iteration to work with
-fix minimum requirments
-refactor and optimization
+plan for every task:
+1- prompt engineering for planing task with chatGPT
+2- plan with Codex and finetune
+3- execute 3 iterations of plan
+4- scan and pick an iteration as base point
+5- minor touches to meet minimum requirements and styling
+6- refactor / cleaning / optimization
 
-task-2
-
-
-task-3
-
-
-task-4
 
 good:
 -task 1 :
@@ -27,6 +23,8 @@ good:
 
 task-2
 - good styling with nice touches on gradients shadow and animation
+- initial logic seems to meet all requirements at first glance
+- identified url history improvement
 
 task-3
 
@@ -49,6 +47,8 @@ task-2
 - weird grid behaviour for product cards, instead of taking equal space per product card, it has fluid columns which causes diferent sizes of cards on same res
 - product cards made with grid, i prefer flexbox. my bad for not prompting it
 - weird stock badge with massive bg circle
+- failed to add card appearing animatition 1 by 1 instead of by bulk. leaving it for the end since im not sure how to do it with vanilla js and css
+- URL state was being rewritten but not navigable with browser back/forward.
 
 task-3
 

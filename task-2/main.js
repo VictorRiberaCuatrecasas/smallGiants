@@ -10,6 +10,7 @@ const products = [
 ];
 
 const categories = ["All", ...new Set(products.map((product) => product.category))];
+const validSorts = new Set(["default", "price-asc", "price-desc", "title-asc"]);
 const maxPrice = Math.max(...products.map((product) => product.price));
 const minPrice = Math.min(...products.map((product) => product.price));
 const defaults = { category: "All", maxPrice, inStock: false, sort: "default" };
@@ -43,7 +44,7 @@ function readStateFromUrl() {
     category: categories.includes(category) ? category : defaults.category,
     maxPrice: Number.isFinite(parsedMaxPrice) ? Math.min(Math.max(parsedMaxPrice, minPrice), maxPrice) : defaults.maxPrice,
     inStock: params.get("inStock") === "true",
-    sort: ["default", "price-asc", "price-desc", "title-asc"].includes(sort) ? sort : defaults.sort
+    sort: validSorts.has(sort) ? sort : defaults.sort
   };
 }
 
@@ -58,10 +59,11 @@ function populateControls() {
 
   syncInputs();
 
-  refs.category.addEventListener("change", () => setState({ category: refs.category.value }));
-  refs.maxPrice.addEventListener("input", () => setState({ maxPrice: Number(refs.maxPrice.value) }));
-  refs.stock.addEventListener("change", () => setState({ inStock: refs.stock.checked }));
-  refs.sort.addEventListener("change", () => setState({ sort: refs.sort.value }));
+  refs.category.addEventListener("change", () => applyState({ category: refs.category.value }, "push"));
+  refs.maxPrice.addEventListener("input", () => applyState({ maxPrice: Number(refs.maxPrice.value) }));
+  refs.maxPrice.addEventListener("change", () => syncUrl("push"));
+  refs.stock.addEventListener("change", () => applyState({ inStock: refs.stock.checked }, "push"));
+  refs.sort.addEventListener("change", () => applyState({ sort: refs.sort.value }, "push"));
 }
 
 function syncInputs() {
@@ -72,14 +74,31 @@ function syncInputs() {
   refs.sort.value = state.sort;
 }
 
-function setState(patch) {
-  Object.assign(state, patch);
+function stateMatches(nextState) {
+  return state.category === nextState.category
+    && state.maxPrice === nextState.maxPrice
+    && state.inStock === nextState.inStock
+    && state.sort === nextState.sort;
+}
+
+function applyState(patch, urlMode = null) {
+  const nextState = { ...state, ...patch };
+
+  if (stateMatches(nextState)) {
+    return;
+  }
+
+  Object.assign(state, nextState);
   syncInputs();
-  syncUrl();
+
+  if (urlMode) {
+    syncUrl(urlMode);
+  }
+
   render();
 }
 
-function syncUrl() {
+function syncUrl(mode = "replace") {
   const params = new URLSearchParams();
 
   if (state.category !== defaults.category) {
@@ -99,7 +118,14 @@ function syncUrl() {
   }
 
   const query = params.toString();
-  window.history.replaceState({}, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
+  const nextUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+  const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+  if (nextUrl === currentUrl) {
+    return;
+  }
+
+  window.history[mode === "push" ? "pushState" : "replaceState"]({}, "", nextUrl);
 }
 
 function getVisibleProducts() {
@@ -164,6 +190,12 @@ function render() {
   refs.count.textContent = `Showing ${list.length} of ${products.length} products`;
   renderProducts(list);
 }
+
+window.addEventListener("popstate", () => {
+  Object.assign(state, readStateFromUrl());
+  syncInputs();
+  render();
+});
 
 populateControls();
 syncUrl();
