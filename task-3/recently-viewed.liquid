@@ -1,0 +1,166 @@
+{% comment %} recently-viewed.liquid {% endcomment %}
+
+{% if request.page_type == 'product' %}
+  {%- assign max_items = 4 -%}
+  {%- assign handles = recently_viewed_handles | default: '' | split: ',' -%}
+  {%- assign shown_items = 0 -%}
+
+  {%- capture rendered_items -%}
+    {% for handle in handles %}
+      {%- assign normalized_handle = handle | strip -%}
+      {%- assign recent_product = all_products[normalized_handle] -%}
+
+      {% if normalized_handle != blank and recent_product != blank %}
+        {% unless recent_product.handle == product.handle %}
+          <li class="recently-viewed__item">
+            <a href="{{ recent_product.url }}">
+              {% if recent_product.featured_image %}
+                <img
+                  src="{{ recent_product.featured_image | img_url: '300x' }}"
+                  alt="{{ recent_product.title | escape }}"
+                  loading="lazy"
+                >
+              {% endif %}
+
+              <span>{{ recent_product.vendor }}</span>
+              <span>{{ recent_product.title }}</span>
+              <span>{{ recent_product.price | money }}</span>
+            </a>
+          </li>
+
+          {%- assign shown_items = shown_items | plus: 1 -%}
+
+          {% if shown_items >= max_items %}
+            {% break %}
+          {% endif %}
+        {% endunless %}
+      {% endif %}
+    {% endfor %}
+  {%- endcapture -%}
+
+  <section
+    class="recently-viewed"
+    data-recently-viewed
+    data-current-handle="{{ product.handle }}"
+    data-currency="{{ shop.currency }}"
+    {% if shown_items == 0 %}hidden{% endif %}
+    aria-labelledby="recently-viewed-heading"
+  >
+    <h2 id="recently-viewed-heading">Recently viewed</h2>
+    <ul class="recently-viewed__list" data-recently-viewed-list>
+      {{ rendered_items }}
+    </ul>
+  </section>
+
+  <script>
+    (function () {
+      const root = document.querySelector("[data-recently-viewed]");
+
+      if (!root) {
+        return;
+      }
+
+      const list = root.querySelector("[data-recently-viewed-list]");
+      const storageKey = "recentlyViewedHandles";
+      const currentHandle = {{ product.handle | json }};
+      const currency = root.dataset.currency || "USD";
+      const routesRoot = window.Shopify && window.Shopify.routes && window.Shopify.routes.root
+        ? window.Shopify.routes.root
+        : "/";
+      let handles = [];
+
+      try {
+        handles = JSON.parse(window.localStorage.getItem(storageKey)) || [];
+      } catch (error) {
+        handles = [];
+      }
+
+      handles = [currentHandle]
+        .concat(handles.filter((handle) => handle !== currentHandle))
+        .slice(0, 8);
+
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(handles));
+      } catch (error) {
+        return;
+      }
+
+      const visibleHandles = handles
+        .filter((handle) => handle && handle !== currentHandle)
+        .slice(0, 4);
+
+      if (!visibleHandles.length) {
+        root.hidden = true;
+        return;
+      }
+
+      if (list.children.length > 0) {
+        root.hidden = false;
+        return;
+      }
+
+      function formatMoney(cents) {
+        return new Intl.NumberFormat(undefined, {
+          style: "currency",
+          currency: currency
+        }).format((cents || 0) / 100);
+      }
+
+      function buildCard(product) {
+        if (!product || !product.url) {
+          return null;
+        }
+
+        const item = document.createElement("li");
+        item.className = "recently-viewed__item";
+
+        const link = document.createElement("a");
+        link.href = product.url;
+
+        if (product.featured_image) {
+          const image = document.createElement("img");
+          image.src = product.featured_image;
+          image.alt = product.title || "";
+          image.loading = "lazy";
+          link.appendChild(image);
+        }
+
+        if (product.vendor) {
+          const vendor = document.createElement("span");
+          vendor.textContent = product.vendor;
+          link.appendChild(vendor);
+        }
+
+        const title = document.createElement("span");
+        title.textContent = product.title || "";
+
+        const price = document.createElement("span");
+        price.textContent = formatMoney(product.price);
+
+        link.appendChild(title);
+        link.appendChild(price);
+        item.appendChild(link);
+
+        return item;
+      }
+
+      Promise.all(
+        visibleHandles.map((handle) =>
+          fetch(routesRoot + "products/" + encodeURIComponent(handle) + ".js")
+            .then((response) => response.ok ? response.json() : null)
+            .catch(() => null)
+        )
+      ).then((products) => {
+        const cards = products.map(buildCard).filter(Boolean);
+
+        if (!cards.length) {
+          root.hidden = true;
+          return;
+        }
+
+        list.replaceChildren(...cards);
+        root.hidden = false;
+      });
+    }());
+  </script>
+{% endif %}

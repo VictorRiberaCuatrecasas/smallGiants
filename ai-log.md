@@ -27,7 +27,7 @@ task-2
 - identified url history improvement
 
 task-3
-
+- good explaining of liquid docs
 
 task-4
 
@@ -51,7 +51,9 @@ task-2
 - URL state was being rewritten but not navigable with browser back/forward.
 
 task-3
-
+- initial output was almost js only. it didnt use liquid which i guess is the point of the exercise
+- turned readme into a giant file
+- stored handles in cart.attributes which felt like a workaround
 
 task-4
 
