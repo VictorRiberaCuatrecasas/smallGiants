@@ -30,6 +30,8 @@ task-3
 - good explaining of liquid docs
 
 task-4
+- mostly spot on on fields
+- good switch from json to .md table
 
 bad:
 
@@ -56,5 +58,6 @@ task-3
 - stored handles in cart.attributes which felt like a workaround
 
 task-4
+- too strict on required fields
 
 TODO: prettify with ia
